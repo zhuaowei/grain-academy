@@ -1,9 +1,7 @@
 package top.zhuaowei.service.edu.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import top.zhuaowei.service.edu.entity.Teacher;
 import top.zhuaowei.service.edu.service.TeacherService;
 
@@ -27,6 +25,11 @@ public class TeacherController {
     @GetMapping("all")
     public List<Teacher> findAllTeachers() {
         return teacherService.list(null);
+    }
+
+    @DeleteMapping("{id}")
+    public boolean removeTeacher(@PathVariable String id) {
+        return teacherService.removeById(id);
     }
 
 }

@@ -1,10 +1,10 @@
 package top.zhuaowei.service.edu.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.*;
+
 import java.io.Serializable;
 import java.time.LocalDateTime;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
@@ -51,15 +51,19 @@ public class Teacher implements Serializable {
     private Integer weight;
 
     @ApiModelProperty("创建时间")
+    @TableField(fill = FieldFill.INSERT)
     private LocalDateTime gmtCreate;
 
     @ApiModelProperty("修改时间")
+    @TableField(fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime gmtModified;
 
     @ApiModelProperty("乐观锁，默认为1")
+    @Version
     private Integer version;
 
     @ApiModelProperty("是否被删除，默认为0")
+    @TableLogic
     private Boolean isDeleted;
 
 
