@@ -555,3 +555,231 @@ public class TeacherVo implements Serializable {
     TeacherVo() {}
 }
 ```
+
+## 6、添加异常处理功能
+
+如果发生了异常，返回结果就不会按照我们定义的接口那样返回，而且对用户来说，看到不明白意义的报错页面体验也不好，我们需要自己来控制异常发生时的处理方案。
+
+异常捕获分为三种，一种是全局异常，它是所有异常类的父类，只要捕获到未定义的异常都可以交给它来处理。
+
+二是特定异常，是上面异常的具体子类，他可以处理详细的、特定的异常类。
+
+三是自定义的异常，可以处理我们业务中会碰到的特殊异常，例如登录失败异常，验证失败异常等。
+
+6.1、配置异常处理
+
+我们将异常配置在 common/base 模块中，其他模块引用即可。
+
+> MyMetaObjectHandler.java
+
+```java
+@ControllerAdvice
+public class GlobalExceptionHandler {
+
+  /**
+   * 处理全局异常
+   * @param e
+   * @return
+   */
+  @ExceptionHandler(Exception.class)
+  @ResponseBody
+  public ResultBody error(Exception e) {
+    return ResultBody.error().message("执行了全局异常");
+  }
+
+  /**
+   * 处理特定异常
+   * @param e
+   * @return
+   */
+  @ExceptionHandler(ArithmeticException.class)
+  @ResponseBody
+  public ResultBody error(ArithmeticException e) {
+    return ResultBody.error().message("执行了特定异常");
+  }
+
+  /**
+   * 处理自定义异常
+   * @param e
+   * @return
+   */
+  @ExceptionHandler(GrainException.class)
+  @ResponseBody
+  public ResultBody error(GrainException e) {
+    return ResultBody.error().code(e.getCode()).message(e.getMsg());
+  }
+}
+
+```
+
+上面的配置示范了三类异常捕获的处理方式，我们在业务逻辑中使用 try-catch 进行捕获异常，捕获到后，新建一个目标异常类即可。
+
+第三种是自定义的异常类，它的代码在下一节说明。
+
+6.2、自定义异常类
+
+```java
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+public class GrainException extends RuntimeException {
+    private Integer code;
+    private String msg;
+}
+
+```
+
+这个异常类的定义比较简单，后续可以根据自己的需要进行完善。
+
+> 在 base 中我们用到了 utils 模块，所以将它引入到了 base 模块中。其他的用到 base 模块的就可以不用再引入 utils 模块了，以免发生冲突。
+
+## 7、日志配置
+
+日志有助于bug定位和修复，在实际开发和生产中都起到很重要的作用。下面来配置日志：
+
+1、首先删除 application.properties 中的日志，包括mybatis plus的日志。
+
+2、新建一个 logback-spring.xml 文件，在里面写上日志配置。
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="10 seconds">
+    <contextName>logback</contextName>
+    <property name="log.path" value="C:/Temp/grain_academy/edu" />
+    <!-- 引入默认配置 -->
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    <!-- console
+            输出到控制台
+        -->
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level>
+        </filter>
+        <encoder>
+            <pattern>
+                %d{yyyy-MM-dd HH:mm:ss.SSS} %clr(%-5level) %boldMagenta(${PID}) --- %red([%thread]) %cyan(%-50logger{50}) : %msg%n
+            </pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- DEBUG -->
+    <appender name="debugFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log.path}/log-debug.log</file>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %clr(%-5level) %boldMagenta(${PID}) --- %red([%thread]) %cyan(%-50logger{50}) : %msg%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${log.path}/debug/%d{yyyy-MM-dd}.log</fileNamePattern>
+            <totalSizeCap>100MB</totalSizeCap>
+            <!-- 日志保留天数 -->
+            <maxHistory>15</maxHistory>
+        </rollingPolicy>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>DEBUG</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+    </appender>
+
+    <!-- infoFile
+        配置输出到文件的日志
+    -->
+    <appender name="infoFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log.path}/log-info.log</file>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %clr(%-5level) %boldMagenta(${PID}) --- %red([%thread]) %cyan(%-50logger{50}) : %msg%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${log.path}/info/%d{yyyy-MM-dd}.log</fileNamePattern>
+            <totalSizeCap>100MB</totalSizeCap>
+            <!-- 日志保留天数 -->
+            <maxHistory>15</maxHistory>
+        </rollingPolicy>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>INFO</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+    </appender>
+
+    <!-- 输出 level 为 WARN 的日志 -->
+    <appender name="warnFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log.path}/log-warn.log</file>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %clr(%-5level) %boldMagenta(${PID}) --- %red([%thread]) %cyan(%-50logger{50}) : %msg%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${log.path}/warn/%d{yyyy-MM-dd}.log</fileNamePattern>
+            <totalSizeCap>100MB</totalSizeCap>
+            <!-- 日志保留天数 -->
+            <maxHistory>15</maxHistory>
+        </rollingPolicy>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>WARN</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+    </appender>
+
+    <!-- 输出 level 为 ERROR 的日志 -->
+    <appender name="errorFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log.path}/log-error.log</file>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %clr(%-5level) %boldMagenta(${PID}) --- %red([%thread]) %cyan(%-50logger{50}) : %msg%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${log.path}/error/%d{yyyy-MM-dd}.log</fileNamePattern>
+            <totalSizeCap>100MB</totalSizeCap>
+            <!-- 日志保留天数 -->
+            <maxHistory>15</maxHistory>
+        </rollingPolicy>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>ERROR</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+    </appender>
+
+
+    <!-- 开发环境日志配置 -->
+    <springProfile name="dev">
+        <logger name="top.zhuaowei" level="INFO"></logger>
+        <root level="INFO">
+            <appender-ref ref="console" />
+            <appender-ref ref="debugFile" />
+            <appender-ref ref="infoFile" />
+            <appender-ref ref="warnFile" />
+            <appender-ref ref="errorFile" />
+        </root>
+    </springProfile>
+
+    <!-- 测试环境日志配置 -->
+<!--    <springProfile name="test">-->
+<!--        <root level="WARN">-->
+<!--            <appender-ref ref="console" />-->
+<!--            <appender-ref ref="debugFile" />-->
+<!--            <appender-ref ref="infoFile" />-->
+<!--            <appender-ref ref="warnFile" />-->
+<!--            <appender-ref ref="errorFile" />-->
+<!--        </root>-->
+<!--    </springProfile>-->
+
+    <!-- 生产环境日志配置 -->
+    <springProfile name="prod">
+        <root level="INFO">
+            <appender-ref ref="debugFile" />
+            <appender-ref ref="infoFile" />
+            <appender-ref ref="warnFile" />
+            <appender-ref ref="errorFile" />
+        </root>
+    </springProfile>
+</configuration>
+```
+
+启动后就可以在控制台看到按照配置模板生成的日志，同时，在配置的日志文件夹中也可以看到生成的日志文件。
