@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="10 seconds">
+    <contextName>logback</contextName>
+    <property name="log.path" value="C:/Temp/grain_academy/edu" />
+    <!-- 引入默认配置 -->
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    <!-- console
+            输出到控制台
+        -->
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level>
+        </filter>
+        <encoder>
+            <pattern>
+                %d{yyyy-MM-dd HH:mm:ss.SSS} %clr(%-5level) %boldMagenta(${PID}) --- %red([%thread]) %cyan(%-50logger{50}) : %msg%n
+            </pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- DEBUG -->
+    <appender name="debugFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log.path}/log-debug.log</file>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %clr(%-5level) %boldMagenta(${PID}) --- %red([%thread]) %cyan(%-50logger{50}) : %msg%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${log.path}/debug/%d{yyyy-MM-dd}.log</fileNamePattern>
+            <totalSizeCap>100MB</totalSizeCap>
+            <!-- 日志保留天数 -->
+            <maxHistory>15</maxHistory>
+        </rollingPolicy>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>DEBUG</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+    </appender>
+
+    <!-- infoFile
+        配置输出到文件的日志
+    -->
+    <appender name="infoFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log.path}/log-info.log</file>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %clr(%-5level) %boldMagenta(${PID}) --- %red([%thread]) %cyan(%-50logger{50}) : %msg%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${log.path}/info/%d{yyyy-MM-dd}.log</fileNamePattern>
+            <totalSizeCap>100MB</totalSizeCap>
+            <!-- 日志保留天数 -->
+            <maxHistory>15</maxHistory>
+        </rollingPolicy>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>INFO</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+    </appender>
+
+    <!-- 输出 level 为 WARN 的日志 -->
+    <appender name="warnFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log.path}/log-warn.log</file>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %clr(%-5level) %boldMagenta(${PID}) --- %red([%thread]) %cyan(%-50logger{50}) : %msg%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${log.path}/warn/%d{yyyy-MM-dd}.log</fileNamePattern>
+            <totalSizeCap>100MB</totalSizeCap>
+            <!-- 日志保留天数 -->
+            <maxHistory>15</maxHistory>
+        </rollingPolicy>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>WARN</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+    </appender>
+
+    <!-- 输出 level 为 ERROR 的日志 -->
+    <appender name="errorFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log.path}/log-error.log</file>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %clr(%-5level) %boldMagenta(${PID}) --- %red([%thread]) %cyan(%-50logger{50}) : %msg%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${log.path}/error/%d{yyyy-MM-dd}.log</fileNamePattern>
+            <totalSizeCap>100MB</totalSizeCap>
+            <!-- 日志保留天数 -->
+            <maxHistory>15</maxHistory>
+        </rollingPolicy>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>ERROR</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+    </appender>
+
+
+    <!-- 开发环境日志配置 -->
+    <springProfile name="dev">
+        <logger name="top.zhuaowei" level="INFO"></logger>
+        <root level="INFO">
+            <appender-ref ref="console" />
+            <appender-ref ref="debugFile" />
+            <appender-ref ref="infoFile" />
+            <appender-ref ref="warnFile" />
+            <appender-ref ref="errorFile" />
+        </root>
+    </springProfile>
+
+    <!-- 测试环境日志配置 -->
+<!--    <springProfile name="test">-->
+<!--        <root level="WARN">-->
+<!--            <appender-ref ref="console" />-->
+<!--            <appender-ref ref="debugFile" />-->
+<!--            <appender-ref ref="infoFile" />-->
+<!--            <appender-ref ref="warnFile" />-->
+<!--            <appender-ref ref="errorFile" />-->
+<!--        </root>-->
+<!--    </springProfile>-->
+
+    <!-- 生产环境日志配置 -->
+    <springProfile name="prod">
+        <root level="INFO">
+            <appender-ref ref="debugFile" />
+            <appender-ref ref="infoFile" />
+            <appender-ref ref="warnFile" />
+            <appender-ref ref="errorFile" />
+        </root>
+    </springProfile>
+</configuration>
