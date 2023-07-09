@@ -11,6 +11,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>base</module>
+        <module>utils</module>
     </modules>
     <artifactId>common</artifactId>
 
@@ -43,6 +44,11 @@
         <dependency>
             <groupId>io.springfox</groupId>
             <artifactId>springfox-swagger-ui</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 

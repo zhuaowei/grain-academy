@@ -349,3 +349,209 @@ public class EduApp {
 
 点击展开可以看到接口的详细信息和具体示例。也可以在页面上输入参数并点击 `try it out` 按扭进行测试。
 
+## 4、统一返回接口
+
+为了将接口的返回结果统一，需要对返回结果的字段进行规定。一般来说，返回接口的数据应该包含4个字段：
+
+1. sucess: boolean 是否成功
+2. code: Integer 状态码
+3. message: String 返回信息
+4. data: Map 返回数据，是键值对
+
+### 4.1、新建 utils 子模块
+
+跟上面新建子模块一样，在 common 模块下新建一个 utils 子模块。现在项目的模块结构是这样的：
+
+- grain_parent
+  - common
+    - base
+    - utils
+  - service
+    - service_edu
+    - service_vod
+
+### 4.2、编写返回数据接口
+
+下面是一个返回数据接口类的示例：
+
+```java
+@Data
+@Builder
+public class ResultBody implements Serializable {
+    private Boolean success;
+    private Integer code;
+    private String message;
+    private Map<String, Object> data = new HashMap<>();
+
+    @Tolerate
+    ResultBody() {}
+
+    public static ResultBody ok() {
+        ResultBody result = new ResultBody();
+        result.setSuccess(true);
+        result.setCode(ResultCode.SUCCESS);
+        result.setMessage("success");
+        return result;
+    }
+
+    public static ResultBody error() {
+        ResultBody result = new ResultBody();
+        result.setSuccess(false);
+        result.setCode(ResultCode.ERROR);
+        result.setMessage("error");
+        return result;
+    }
+
+    public ResultBody data(String key, Object value) {
+        this.data.put(key, value);
+        return this;
+    }
+}
+```
+
+在这个类的code属性中用到了一个接口的属性。
+
+```java
+public interface ResultCode {
+    Integer SUCCESS = 200;
+    Integer ERROR = 400;
+}
+```
+
+### 4.3、配置依赖
+
+写好了返回数据类后，需要在其他模块引入。跟上面的一样，在 service 模块中引入，下面的所有子模块都可以使用该模块。
+
+```xml
+<dependency>
+    <groupId>top.zhuaowei</groupId>
+    <artifactId>utils</artifactId>
+    <version>1.0-SNAPSHOT</version>
+</dependency>
+```
+
+## 5、完善讲师模块
+
+讲师模块需要完成对讲师的增删改查，下面是具体的代码。下面的代码完成了对讲师的查询，包括查询全部，按id查询，分页多条件查询；还有对讲师的添加，修改和删除。
+
+```java
+@RestController
+@RequestMapping("/edu/teacher")
+public class TeacherController {
+
+    @Autowired
+    private TeacherService teacherService;
+
+    @GetMapping("all")
+    public ResultBody findAllTeachers() {
+        List<Teacher> list = teacherService.list(null);
+
+        return ResultBody.ok().data("items", list);
+    }
+
+    @GetMapping("{id}")
+    public ResultBody getTeacher(String id) {
+        Teacher teacher = teacherService.getById(id);
+        if (null == teacher) {
+            return ResultBody.error();
+        } else {
+            return ResultBody.ok().data("item", teacher);
+        }
+    }
+
+    @DeleteMapping("delete")
+    public ResultBody removeTeacher(String id) {
+        boolean result = teacherService.removeById(id);
+        if (result == true) {
+            return ResultBody.ok();
+        } else {
+            return ResultBody.error();
+        }
+    }
+
+    @GetMapping("getPage")
+    public ResultBody pageTeacher(@RequestParam Integer current, @RequestParam Integer limit) {
+        Page<Teacher> page = new Page<>(current, limit);
+        teacherService.page(page);
+        return ResultBody.ok().data("total", page.getTotal()).data("rows", page.getRecords());
+    }
+
+    @PostMapping("page")
+    public ResultBody pageQueryTeacher(
+            Integer current, Integer limit,
+            @RequestBody(required = false) TeacherVo teacherVo) {
+        Page<Teacher> page = new Page<>(current, limit);
+
+        QueryWrapper<Teacher> wrapper = new QueryWrapper<>();
+        String name = teacherVo.getName();
+        Integer level = teacherVo.getLevel();
+        String startTime = teacherVo.getStartTime();
+        String endTime = teacherVo.getEndTime();
+
+        if (!StringUtils.isEmpty(name)) {
+            wrapper.like("name", name);
+        }
+        if (null != level) {
+            wrapper.eq("level", level);
+        }
+        if (!StringUtils.isEmpty(startTime)) {
+            wrapper.gt("gmt_create", startTime);
+        }
+        if (!StringUtils.isEmpty(endTime)) {
+            wrapper.lt("gmt_create", endTime);
+        }
+
+        teacherService.page(page, wrapper);
+        return ResultBody.ok().data("total", page.getTotal()).data("rows", page.getRecords());
+    }
+
+    @PostMapping("add")
+    public ResultBody addTeacher(@RequestBody Teacher teacher) {
+        boolean result = teacherService.save(teacher);
+        if (result == true) {
+            return ResultBody.ok();
+        } else {
+            return ResultBody.error();
+        }
+    }
+
+    @PostMapping("update")
+    public ResultBody updateTeacher(@RequestBody Teacher teacher) {
+        boolean result = teacherService.updateById(teacher);
+        if (result == true) {
+            return ResultBody.ok();
+        } else {
+            return ResultBody.error();
+        }
+    }
+
+}
+```
+
+在上面的分页多条件查询中用到了一个新建的类 TeacherVo，它是专门用来接口前端传过来的查询条件的，因为使用了 RequestBody 注解，它需要接收前端传来的请求体中的数据，所以需要使用 post 方法。因为 get 请求方法没有请求体。
+
+在注解中给属性 required 赋值为 false，表示所有字段都不是必须的。当我们把条件封装成 QueryWrapper 后，MyBatis Plus 会动态拼接 SQL 查询语句。
+
+下面是 TeacherVo 类的具体代码：
+
+```java
+@Data
+@Builder
+public class TeacherVo implements Serializable {
+    @ApiModelProperty(value = "讲师姓名，模糊查询")
+    private String name;
+
+    @ApiModelProperty(value = "讲师级别")
+    private Integer level;
+
+    // 是String类型，后端会进行数据转换
+    @ApiModelProperty(value = "讲师创建时间开始范围", example = "2023-07-09 10:53:21")
+    private String startTime;
+
+    @ApiModelProperty(value = "讲师创建时间结束范围", example = "2023-07-09 10:53:21")
+    private String endTime;
+
+    @Tolerate
+    TeacherVo() {}
+}
+```

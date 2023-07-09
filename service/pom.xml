@@ -16,11 +16,18 @@
     <artifactId>service</artifactId>
 
     <dependencies>
+        <!-- BEGIN : 二方库 -->
         <dependency>
             <groupId>top.zhuaowei</groupId>
             <artifactId>base</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>top.zhuaowei</groupId>
+            <artifactId>utils</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <!-- END : 二方库 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
