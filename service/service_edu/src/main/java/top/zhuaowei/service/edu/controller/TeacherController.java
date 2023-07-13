@@ -7,7 +7,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import top.zhuaowei.common.utils.ResultBody;
 import top.zhuaowei.service.edu.entity.Teacher;
-import top.zhuaowei.service.edu.entity.TeacherVo;
+import top.zhuaowei.service.edu.entity.TeacherQuery;
 import top.zhuaowei.service.edu.service.TeacherService;
 
 import java.util.List;
@@ -22,6 +22,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/edu/teacher")
+@CrossOrigin
 public class TeacherController {
 
     @Autowired
@@ -35,7 +36,7 @@ public class TeacherController {
     }
 
     @GetMapping("{id}")
-    public ResultBody getTeacher(String id) {
+    public ResultBody getTeacher(@PathVariable String id) {
         Teacher teacher = teacherService.getById(id);
         if (null == teacher) {
             return ResultBody.error();
@@ -64,14 +65,14 @@ public class TeacherController {
     @PostMapping("page")
     public ResultBody pageQueryTeacher(
             Integer current, Integer limit,
-            @RequestBody(required = false) TeacherVo teacherVo) {
+            @RequestBody(required = false) TeacherQuery teacherQuery) {
         Page<Teacher> page = new Page<>(current, limit);
 
         QueryWrapper<Teacher> wrapper = new QueryWrapper<>();
-        String name = teacherVo.getName();
-        Integer level = teacherVo.getLevel();
-        String startTime = teacherVo.getStartTime();
-        String endTime = teacherVo.getEndTime();
+        String name = teacherQuery.getName();
+        Integer level = teacherQuery.getLevel();
+        String startTime = teacherQuery.getStartTime();
+        String endTime = teacherQuery.getEndTime();
 
         if (!StringUtils.isEmpty(name)) {
             wrapper.like("name", name);

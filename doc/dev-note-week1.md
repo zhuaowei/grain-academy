@@ -479,14 +479,14 @@ public class TeacherController {
     @PostMapping("page")
     public ResultBody pageQueryTeacher(
             Integer current, Integer limit,
-            @RequestBody(required = false) TeacherVo teacherVo) {
+            @RequestBody(required = false) TeacherVo teacherQuery) {
         Page<Teacher> page = new Page<>(current, limit);
 
         QueryWrapper<Teacher> wrapper = new QueryWrapper<>();
-        String name = teacherVo.getName();
-        Integer level = teacherVo.getLevel();
-        String startTime = teacherVo.getStartTime();
-        String endTime = teacherVo.getEndTime();
+        String name = teacherQuery.getName();
+        Integer level = teacherQuery.getLevel();
+        String startTime = teacherQuery.getStartTime();
+        String endTime = teacherQuery.getEndTime();
 
         if (!StringUtils.isEmpty(name)) {
             wrapper.like("name", name);

@@ -3,6 +3,7 @@ package top.zhuaowei.service.edu.entity;
 import com.baomidou.mybatisplus.annotation.*;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import io.swagger.annotations.ApiModel;
@@ -32,6 +33,18 @@ public class Teacher implements Serializable {
     @ApiModelProperty("讲师姓名")
     @TableField("`name`")
     private String name;
+
+    @ApiModelProperty("讲师性别")
+    private Boolean gender;
+
+    @ApiModelProperty("生日")
+    private LocalDate birth;
+
+    @ApiModelProperty("讲师联系方式")
+    private String contact;
+
+    @ApiModelProperty("讲师住址")
+    private String address;
 
     @ApiModelProperty("讲师介绍")
     private String introduce;

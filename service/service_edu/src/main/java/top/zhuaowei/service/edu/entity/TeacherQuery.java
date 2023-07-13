@@ -9,7 +9,7 @@ import java.io.Serializable;
 
 @Data
 @Builder
-public class TeacherVo implements Serializable {
+public class TeacherQuery implements Serializable {
     @ApiModelProperty(value = "讲师姓名，模糊查询")
     private String name;
 
@@ -24,5 +24,5 @@ public class TeacherVo implements Serializable {
     private String endTime;
 
     @Tolerate
-    TeacherVo() {}
+    TeacherQuery() {}
 }
