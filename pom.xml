@@ -24,6 +24,7 @@
         <swagger.version>2.9.2</swagger.version>
         <jackson.version>2.14.2</jackson.version>
         <lombok.version>1.18.24</lombok.version>
+        <aliyun-sdk-oss.version>3.15.1</aliyun-sdk-oss.version>
     </properties>
     <!-- 管理依赖的 -->
     <dependencyManagement>
@@ -92,6 +93,12 @@
                 <artifactId>lombok</artifactId>
                 <version>${lombok.version}</version>
                 <scope>compile</scope>
+            </dependency>
+            <!-- 阿里云oss -->
+            <dependency>
+                <groupId>com.aliyun.oss</groupId>
+                <artifactId>aliyun-sdk-oss</artifactId>
+                <version>${aliyun-sdk-oss.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

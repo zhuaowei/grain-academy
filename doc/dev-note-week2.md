@@ -45,3 +45,67 @@ public class JacksonConfig {
 ```
 
 这里配置了日期类型和时间类型的序列化和反序列化，还可以配置时区等配置。
+
+## 2、文件上传
+
+### 2.1、申请阿里云 OSS 对象存储服务
+
+在阿里云官网找到 对象存储OSS， 开通服务后点击 新建Bucket，填写名称、选择地域、低频访问、公共读。选择完成后点击创建。
+
+Bucket 名字是唯一的，后面配置需要用到。然后点击头像菜单下的 AccessKey管理，新建一个AccessKey。保存好，同样需要在后面配置。
+
+### 2.2、创建配置项目
+
+在 service 模块下配置一个新的 oss 模块，用于文件的上传。
+
+1、添加阿里云oss的依赖
+
+首先在父模块中添加阿里云的依赖，并进行版本管理。
+
+```xml
+<aliyun-sdk-oss.version>3.15.1</aliyun-sdk-oss.version>
+<!-- 阿里云oss -->
+<dependency>
+    <groupId>com.aliyun.oss</groupId>
+    <artifactId>aliyun-sdk-oss</artifactId>
+    <version>${aliyun-sdk-oss.version}</version>
+</dependency>
+```
+
+因为只有oss模块会用到此依赖，所以在oss模块下添加依赖
+
+```xml
+<dependency>
+    <groupId>com.aliyun.oss</groupId>
+    <artifactId>aliyun-sdk-oss</artifactId>
+</dependency>
+```
+
+2、oss模块配置
+
+在上面申请的Bucket和AccessKey需要配置在项目中。application.properties
+
+bucketname就是创建的Bucket的名字，endpoint与选择的地域有关，keyid和keysecret是创建access key时会显示的，要注意保存好。
+
+```properties
+server.port=8002
+spring.application.name=oss
+spring.profiles.active=dev
+
+aliyun.oss.file.endpoint=oss-cn-beijing.aliyuncs.com
+aliyun.oss.file.keyid=LTAI5tCkGDy8fCB1RDfSZhyr
+aliyun.oss.file.keysecret=AdhdtrNNMx636YC0GFMLHeQPnDwsVT
+aliyun.oss.file.bucketname=grain-academy-521
+```
+
+### 2.3、开发文件上传服务
+
+1、文件上传是一个单独的服务，所以需要再开一个端口，创建一个新的springboot主类。
+
+2、创建一个工具类用于读取配置文件中的属性，用于连接阿里云对象存储服务器。
+
+3、创建文件上传服务接口以及实现类，完成文件上传功能。
+
+4、创建一个服务接口，调用文件上传服务。
+
+具体的内容可以参考源代码。
