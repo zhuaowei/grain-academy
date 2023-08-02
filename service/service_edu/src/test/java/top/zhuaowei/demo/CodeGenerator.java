@@ -54,17 +54,19 @@ public class CodeGenerator {
                             .controller("controller")
                             .pathInfo(Collections.singletonMap(OutputFile.xml, "C:\\Project\\java\\grain_parent\\service\\service_edu\\src\\main\\resources\\mapper")); // 设置mapperXml生成路径
                 }).strategyConfig(builder -> {
-                    builder.addInclude("teacher") // 设置需要生成的表名
+                    builder.addInclude("subject") // 设置需要生成的表名
 //                            .addTablePrefix("t_", "c_") // 设置过滤表前缀
                             .entityBuilder()
                             .idType(IdType.ASSIGN_ID) // 生成主键的策略
                             .naming(NamingStrategy.underline_to_camel) // 设置实体类名生成策略
                             .enableLombok() // 开启lombok
                             .columnNaming(NamingStrategy.underline_to_camel)
-                            .controllerBuilder()
+                            .serviceBuilder() // service 文件配置
+                            .fileOverride()
+                            .formatServiceFileName("%sService")
+                            .formatServiceImplFileName("%sServiceImpl")
+                            .controllerBuilder() // controller 配置
                             .enableRestStyle() // 开启restful风格
-                            .formatFileName("%sService")
-                            .formatFileName("%sServiceImpl")
                             ;
 
                 })
